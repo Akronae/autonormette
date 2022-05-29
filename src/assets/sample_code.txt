@@ -1,0 +1,12 @@
+
+t_link *ft_list_pop(t_list *self)
+{
+    if (self->length == 0)
+        return (NULL);
+    return (self->remove_at(self, self->length - 1));
+}
+
+int main (int c)
+{
+    return c * 2;
+}
