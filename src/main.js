@@ -8,11 +8,13 @@ import router from '@/router'
 import store from '@/stores'
 import theme from '@/theme'
 import StringUtils from '@/utils/stringUtils'
+import ParserUtils from '@/utils/ParserUtils'
 import {InlineSvgPlugin} from 'vue-inline-svg';
 
 window.modules =
 {
-    StringUtils
+    StringUtils,
+    ParserUtils
 }
 
 Vue.config.productionTip = false

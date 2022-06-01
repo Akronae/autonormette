@@ -2,6 +2,7 @@
 import Button from '@/components/Button'
 import sample_code from '@/assets/sample_code.txt'
 import CodeParser from '@/utils/CodeParser'
+import CodeWriter from '@/utils/CodeWriter'
 
 
 export default
@@ -12,8 +13,13 @@ export default
     {
         return (
             <div id='home-view'>
-                <textarea cols="140" rows="30" v-model={this.parsed}></textarea>
-                <textarea cols="140" rows="30" v-model={this.code}></textarea>
+                <div class='row'>
+                    <div>
+                        <textarea cols="140" rows="30" v-model={this.code}></textarea>
+                        <textarea cols="140" rows="30" v-model={this.parsed}></textarea>
+                    </div>
+                    <textarea cols="200" rows="60" v-model={this.formatted}></textarea>
+                </div>
             </div>
         )
     },
@@ -22,7 +28,8 @@ export default
     {
         return {
             code: '',
-            parsed: ''
+            parsed: '',
+            formatted: ''
         }
     },
 
@@ -34,7 +41,9 @@ export default
     {
         code ()
         {
-            this.parsed = JSON.stringify(new CodeParser(this.code).tokens, null, 2)
+            const parser = new CodeParser(this.code)
+            this.parsed = JSON.stringify(parser.tokens, null, 2)
+            this.formatted = new CodeWriter(parser.tokens).toString()
         }
     },
 
@@ -69,6 +78,12 @@ export default
         border: gray solid 1px;
         padding: 10px;
         font-family: monospace;
+    }
+
+    .row
+    {
+        display: flex;
+        flex-direction: row;
     }
 }
 </style>

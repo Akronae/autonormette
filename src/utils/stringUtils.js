@@ -202,6 +202,7 @@ function formatAddress (str)
 }
 
 function isAlphabetical (str) {
+    if (!str) return false
     var code, i, len;
   
     for (i = 0, len = str.length; i < len; i++) {
@@ -213,6 +214,12 @@ function isAlphabetical (str) {
     }
     return true;
   };
+
+  function isFirstLetterAlpha (str)
+  {
+      if (!str) return false
+      return isAlphabetical(str[0])
+  }
 
   /**
    * 
@@ -253,4 +260,4 @@ function startsWithAny (str, any)
 
 export default { ALPHABET, NUMERALS, EMPTY, toKebabCase, isEmptyString, removeHtmlTags, isValidEmail, getFrenchPhoneNumbersInString,
     getUrlsInString, getEmailsInString, getStringHash, removeAccents, generateUuid, lineCount, isOverflowing, trim, insertEvery,
-    formatPhoneNumber, extractPhoneNumbers, formatAddress, isAlphabetical, includesAny, removeMultipleSpaces, startsWithAny }
+    formatPhoneNumber, extractPhoneNumbers, formatAddress, isAlphabetical, includesAny, removeMultipleSpaces, startsWithAny, isFirstLetterAlpha }

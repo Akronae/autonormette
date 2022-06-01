@@ -1,8 +1,32 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_list_pop.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adaubric <adaubric@42.fr>                  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/02/04 12:44:06 by adaubric          #+#    #+#             */
+/*   Updated: 2022/02/23 14:22:17 by adaubric         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "ft_list.h"
+#include "../math/ft_math.h"
 
 t_link *ft_list_pop(t_list *self)
 {
+    // that would be shit
+    if (self == NULL) return NULL;
+
+    int  a = 2;
+    int* b;
+    t_list_super_weird          ****a = my_dick();
+
     if (self->length == 0)
+    {
+        printf("length is 0!");
         return (NULL);
+    }
     return (self->remove_at(self, self->length - 1));
 }
 

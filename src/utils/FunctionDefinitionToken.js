@@ -1,7 +1,7 @@
 import CodeToken from "./CodeToken";
 import DefinitionToken from "./DefinitionToken";
 
-export default class FunctionToken extends CodeToken
+export default class FunctionDefinitionToken extends CodeToken
 {
     /** @type {string} */
     returnType
@@ -23,7 +23,7 @@ export default class FunctionToken extends CodeToken
      */
     constructor (returnType, name, args, body)
     {
-        super('FunctionToken')
+        super('FunctionDefinitionToken')
         this.returnType = returnType
         this.name = name
         this.args = args
