@@ -252,12 +252,18 @@ function removeMultipleSpaces (str)
  */
 function startsWithAny (str, any)
 {
-    any.forEach(a =>
-    {
-        if (str.startsWith(a)) return a
-    })
+    return any.some(s => str.startsWith(s))
 }
+/**
+ * 
+ * @param {string} str 
+ * @param {string[]} any 
+ */
+ function endsWithAny (str, any)
+ {
+    return any.some(s => str.endsWith(s))
+ }
 
 export default { ALPHABET, NUMERALS, EMPTY, toKebabCase, isEmptyString, removeHtmlTags, isValidEmail, getFrenchPhoneNumbersInString,
     getUrlsInString, getEmailsInString, getStringHash, removeAccents, generateUuid, lineCount, isOverflowing, trim, insertEvery,
-    formatPhoneNumber, extractPhoneNumbers, formatAddress, isAlphabetical, includesAny, removeMultipleSpaces, startsWithAny, isFirstLetterAlpha }
+    formatPhoneNumber, extractPhoneNumbers, formatAddress, isAlphabetical, includesAny, removeMultipleSpaces, startsWithAny, endsWithAny, isFirstLetterAlpha }

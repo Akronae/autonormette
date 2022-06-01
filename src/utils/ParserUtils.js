@@ -11,7 +11,7 @@ export default class ParserUtils
     static getNextWord (code, wordPos)
     {
         const words = this.getWords(code) || []
-        if (wordPos > words.length - 1) return null
+        if (wordPos > words.length - 1) return ''
 
         return words[wordPos]
     }
@@ -53,6 +53,7 @@ export default class ParserUtils
         if (scope.includes('='))
             scope = scope.replace('=', ' = ')
         const words = this.getWords(scope)
+        console.log(words)
         var defaultValue = null
         var type = ''
         var name = ''
@@ -67,6 +68,7 @@ export default class ParserUtils
         name = name.replace(/\*/gm, '')
         const readUpTo = scope.length
 
+        console.log({ type, name, defaultValue, readUpTo })
         return { type, name, defaultValue, readUpTo }
     }
 

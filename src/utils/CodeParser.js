@@ -9,6 +9,7 @@ import ReturnToken from "./ReturnToken"
 import FunctionCallToken from "./FunctionCallToken"
 import AssignmentToken from "./AssignmentToken"
 import LoopToken, { LoopTokenType } from "./LoopToken"
+import CodeLineToken from "./CodeLineToken"
 
 export default class CodeParser
 {
@@ -33,7 +34,8 @@ export default class CodeParser
     isIdentifier (str)
     {
         str = str.trim(str)
-        while (str[0] == '*') str = str.substring(1)
+        while (StringUtils.startsWithAny(str, ['*', '-', '+'])) str = str.substring(1)
+        while (StringUtils.endsWithAny(str, ['*', '-', '+'])) str = str.substring(0, str.length - 2)
 
         return StringUtils.isAlphabetical(str[0])
     }
@@ -47,7 +49,7 @@ export default class CodeParser
     {
         while (this.code)
         {
-            let read = 1
+            let read = 0
 
                 if (this.code.startsWith(' '))
             {
@@ -130,8 +132,15 @@ export default class CodeParser
             }
             else if (this.isIdentifier(this.getNextWord(0)) && this.getNextWord(1).includes('=') && this.isBefore('=', ';'))
             {
-                this.tokens.push(new AssignmentToken(this.getNextWord(0), this.code.substring(this.code.indexOf('=') + 1, this.code.indexOf(';')).trim()))
+                const operator = this.code.match(/[+-\/*]?=/gm)[0]
+                this.tokens.push(new AssignmentToken(this.getNextWord(0), operator, this.code.substring(this.code.indexOf('=') + 1, this.code.indexOf(';')).trim()))
                 read = this.code.indexOf(';')
+            }
+            else if (this.isIdentifier(this.getNextWord(0)) && (this.isBefore(';', this.getNextWord(1)) || !this.getNextWord(1)))
+            {
+                const scope = this.code.substring(this.code.indexOf(this.getNextWord(0)), this.code.indexOf(';'))
+                this.tokens.push(new CodeLineToken(scope))
+                read = this.code.indexOf(';') + 1
             }
             else if (StringUtils.isFirstLetterAlpha(this.code) && this.isIdentifier(this.getNextWord(1)) && this.code.indexOf(';') > this.code.indexOf(this.getNextWord(1)))
             {

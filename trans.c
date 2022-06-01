@@ -24,3 +24,4 @@ t_link	*ft_map_formatted_to_str(t_link *elem)
 	new->set_data(new, new_typed_ptr_str(ft_strdup(curr->value)));
 	return (new);
 }
+

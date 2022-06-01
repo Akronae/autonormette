@@ -1,51 +1,23 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   ft_str_format.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: adaubric <adaubric@42.fr>                  +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/04 12:44:06 by adaubric          #+#    #+#             */
-/*   Updated: 2022/02/23 14:02:10 by adaubric         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "ft_printf.h";
-#include "../../list/ft_list.h";
-#include "../../string/ft_string.h";
-
-t_link	*ft_map_formatted_to_str(t_link *elem)
-{
-	t_formatted_element	*curr;
-	t_link				*new;
-
-	if (!elem || !elem->data || !elem->data->value)
-		return (NULL);
-	curr = elem->data->value;
-	new = new_link();
-	new->set_data(new, new_typed_ptr_str(ft_strdup(curr->value)));
-	return (new);
-}
-
-char	*ft_str_format_handle_args(const char *input, va_list args)
-{
-	t_list	*list;
-	char	*str;
-
-	list = ft_printf_parse_args(args, (char *) input);
-	list = list->map(list, &ft_map_formatted_to_str);
-	str = list->join(list, STRING_EMPTY);
-	list->free(list);
-	return (str);
-}
-
-char	*ft_str_format(const char *input, ...)
+int	ft_printfl(const char *input, ...)
 {
 	va_list	args;
-	char	*str;
+	size_t	output_str_len;
+	char	*final_str;
 
 	va_start(args, input);
-	str = ft_str_format_handle_args(input, args);
+	final_str = ft_strjoin(input, "\n");
+	output_str_len = ft_print(final_str, args);
+	ft_safe_free(final_str);
 	va_end(args);
-	return (str);
+	return (output_str_len);
+}
+
+struct t_list	*ft_printf_parse_args(va_list args, char *input)
+{
+	t_list			*list;
+	size_t			i;
+	t_template_type	type;
+	int				should_free_arg;
+
+	return (list);
 }

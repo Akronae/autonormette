@@ -1,4 +1,5 @@
 import AssignmentToken from './AssignmentToken'
+import CodeLineToken from './CodeLineToken'
 import CommentToken, { CommentTokenType } from './CommentToken'
 import ConditionalToken, { ConditionalTokenType } from './ConditionalToken'
 import DefinitionToken from './DefinitionToken'
@@ -49,7 +50,9 @@ export default class CodeWriter
 
         const ordered = []
         ordered.push(...tokens.filter(t => t instanceof CommentToken))
-        ordered.push(...tokens.filter(t => t instanceof IncludeToken))
+        var includes = tokens.filter(t => t instanceof IncludeToken)
+        includes.sort((a, b) => b.filePath.localeCompare(a.filePath) + b.isAbsolute * 1000)
+        ordered.push(...includes)
         ordered.push(...tokens.filter(t => t instanceof FunctionDefinitionToken))
         ordered.push(...tokens.filter(t => t instanceof DefinitionToken))
         ordered.push(...tokens.filter(t => !ordered.includes(t)))
@@ -167,10 +170,9 @@ export default class CodeWriter
                 })[0]
                 const longestType = ParserUtils.swapIdentifierPointerStars(longestTypeDef.type, longestTypeDef.name).type
                 const diff = longestType.length - type.length
-                var padding = '\t'.repeat(Math.ceil(Math.max(1, diff / 4)   ))
-                if (type == longestType) padding = '\t'
+                const tabsNeeded = (diff - (type.length % 4)) / 4 + (1 * type.length % 4 != 0)
+                var padding = '\t'.repeat(Math.max(1, Math.ceil(tabsNeeded)))
 
-                console.log(`${type}${padding}${name}${token.defaultValue ? (' = ' + token.defaultValue) : ''};`, diff)
                 this.appendLine(`${type}${padding}${name}${token.defaultValue ? (' = ' + token.defaultValue) : ''};`)
             }
 
@@ -186,7 +188,12 @@ export default class CodeWriter
 
             if (token instanceof AssignmentToken)
             {
-                this.appendLine(`${token.identifier} = ${token.value};`)
+                this.appendLine(`${token.identifier} ${token.operator} ${token.value};`)
+            }
+
+            if (token instanceof CodeLineToken)
+            {
+                this.appendLine(`${token.code};`)
             }
         }
 
