@@ -1,42 +1,10 @@
-struct t_formatted_element	*new_formatted_element(void)
+t_link* ft_map_formatted_to_str (t_link* elem)
 {
-	t_formatted_element	*elem;
-
-	elem = ft_safe_malloc(sizeof(t_formatted_element));
-	elem->value = NULL;
-	elem->length = 0;
-	return (elem);
-}
-
-t_link	*ft_map_formatted_to_str(t_link *elem)
-{
-	if (!elem || !elem->data || !elem->data->value)
-		return (NULL);
-	t_formatted_element *curr = elem->data->value;
-	t_link *new = new_link();
-	new->set_data(new, new_typed_ptr_str(ft_strdup(curr->value)));
+	if (!elem || !elem->data || !elem->data->value) return (NULL);
+	else printf(123);
+	t_formatted_element* curr = elem->data->value;
+	t_link* new = new_link();
+	while(1)
+		new->set_data(new, new_typed_ptr_str(ft_strdup(curr->value)));
 	return (new);
-}
-
-char	*ft_str_format_handle_args(const char *input, va_list args)
-{
-	t_list				*list;
-	char				*str;
-
-	list = ft_printf_parse_args(args, (char *) input);
-	list = list->map(list, &ft_map_formatted_to_str);
-	str = list->join(list, STRING_EMPTY);
-	list->free(list);
-	return (str);
-}
-
-char	*ft_str_format(const char *input, ...)
-{
-	va_list				args;
-	char				*str;
-
-	va_start(args, input);
-	str = ft_str_format_handle_args(input, args);
-	va_end(args);
-	return (str);
 }

@@ -5,6 +5,7 @@ import DefinitionToken from './DefinitionToken'
 import FunctionCallToken from './FunctionCallToken'
 import FunctionDefinitionToken from './FunctionDefinitionToken'
 import IncludeToken from './IncludeToken'
+import LoopToken, { LoopTokenType } from './LoopToken'
 import NewlineToken from './NewlineToken'
 import ParserUtils from './ParserUtils'
 import ReturnToken from './ReturnToken'
@@ -84,7 +85,11 @@ export default class CodeWriter
 
             if (token instanceof IncludeToken)
             {
-                this.appendLine(`#include "${token.filePath}";`)
+                var str = '#include '
+                str += token.isAbsolute ? '<' : '"'
+                str += token.filePath
+                str += token.isAbsolute ? '>' : '"'
+                this.appendLine(str)
             }
 
             if (token instanceof FunctionDefinitionToken)
@@ -112,7 +117,30 @@ export default class CodeWriter
                     [ConditionalTokenType.Else.name]: 'else',
                 }
 
-                this.appendLine(`${keywords[token.type.name]} (${token.condition})`)
+                let str = keywords[token.type.name]
+                if (token.condition) str += ` (${token.condition})`
+                this.appendLine(str)
+                if (token.body.length == 1)
+                    this.str += (new CodeWriter(token.body, this.identation + 1).toString())
+                else
+                {
+                    this.appendLine('{')
+                    this.str += (new CodeWriter(token.body, this.identation + 1).toString())
+                    this.appendLine('}')
+                }
+            }
+
+            if (token instanceof LoopToken)
+            {
+                const keywords =
+                {
+                    [LoopTokenType.For.name]: 'for',
+                    [LoopTokenType.While.name]: 'while',
+                }
+
+                let str = keywords[token.type.name]
+                if (token.condition) str += ` (${token.condition})`
+                this.appendLine(str)
                 if (token.body.length == 1)
                     this.str += (new CodeWriter(token.body, this.identation + 1).toString())
                 else

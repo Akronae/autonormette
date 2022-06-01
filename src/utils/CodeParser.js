@@ -8,6 +8,7 @@ import ConditionalToken, { ConditionalTokenType } from "./ConditionalToken"
 import ReturnToken from "./ReturnToken"
 import FunctionCallToken from "./FunctionCallToken"
 import AssignmentToken from "./AssignmentToken"
+import LoopToken, { LoopTokenType } from "./LoopToken"
 
 export default class CodeParser
 {
@@ -39,8 +40,7 @@ export default class CodeParser
 
     isBefore (before, after)
     {
-        if (this.code.indexOf(before) < 0) return false
-        return this.code.indexOf(before) < this.code.indexOf(after) || this.code.indexOf(after) == -1
+        return ParserUtils.isBefore(this.code, before, after)
     }
 
     parse ()
@@ -65,12 +65,12 @@ export default class CodeParser
                 this.tokens.push(new CommentToken(CommentTokenType.Singleline, this.code.substring(2, commentEndIndex)))
                 read = commentEndIndex
             }
-            else if (this.code.startsWith('#include') && this.isBefore('"', ';'))
+            else if (this.code.startsWith('#include'))
             {
-                const filePathBegin = this.code.indexOf('"') + 1
-                const filePathEnd = this.code.indexOf('"', filePathBegin + 1)
-                this.tokens.push(new IncludeToken(this.code.substring(filePathBegin, filePathEnd)))
-                read = filePathEnd
+                const scope = this.code.substring(this.code.indexOf(' '), this.code.indexOf('\n'))
+                var filepath = scope.substring(scope).replace(/["<>]/gm, '')
+                this.tokens.push(new IncludeToken(filepath.trim(), scope.includes('<')))
+                read = this.code.indexOf('\n')
             }
             else if (this.code.startsWith('if') || this.code.startsWith('else'))
             {
@@ -79,15 +79,24 @@ export default class CodeParser
                 else if (this.code.startsWith('else if')) type = ConditionalTokenType.ElseIf
                 else if (this.code.startsWith('else')) type = ConditionalTokenType.Else
                 
-                var body
-                if (this.isBefore('{', ';'))
-                    body = this.code.substring(this.code.indexOf('{') + 1, this.code.indexOf('}'))
-                else
-                    body = this.code.substring(this.code.indexOf(')') + 1, this.code.indexOf(';') + 1)
+                var body = ParserUtils.extractScopeBody(this.code)
+                var conditionText = ParserUtils.extractScope(this.code, '(', ')')
 
-                var conditionText = this.code.substring(this.code.indexOf('(') + 1, this.code.indexOf(')'))
+                if (type.name == ConditionalTokenType.Else.name) conditionText = null
 
                 this.tokens.push(new ConditionalToken(type, conditionText, new CodeParser(body).tokens))
+                read = this.code.indexOf(body) + body.length
+            }
+            else if (this.code.startsWith('for') || this.code.startsWith('while'))
+            {
+                var type
+                if (this.code.startsWith('for')) type = LoopTokenType.For
+                else if (this.code.startsWith('while')) type = LoopTokenType.While
+                
+                var body = ParserUtils.extractScopeBody(this.code)
+                var conditionText = ParserUtils.extractScope(this.code, '(', ')')
+
+                this.tokens.push(new LoopToken(type, conditionText, new CodeParser(body).tokens))
                 read = this.code.indexOf(body) + body.length
             }
             else if (this.code.startsWith('return'))

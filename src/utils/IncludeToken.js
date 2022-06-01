@@ -6,15 +6,15 @@ export default class IncludeToken extends CodeToken
      * @type {string}
      */
     filePath
+    /**
+     * @type {boolean}
+     */
+    isAbsolute
 
-    constructor (filePath)
+    constructor (filePath, isAbsolute)
     {
         super('IncludeToken')
         this.filePath = filePath
-    }
-
-    toString ()
-    {
-        return `#include "${this.filePath}"\n` 
+        this.isAbsolute = isAbsolute
     }
 }

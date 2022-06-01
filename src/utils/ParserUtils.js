@@ -5,7 +5,7 @@ export default class ParserUtils
     static getWords (code)
     {
         if (!code) return []
-        return stringUtils.removeMultipleSpaces(code.replace(/\t/gm, ' ')).split(' ')
+        return stringUtils.removeMultipleSpaces(code.replace(/\t/gm, ' ')).trim().split(' ')
     }
 
     static getNextWord (code, wordPos)
@@ -17,7 +17,6 @@ export default class ParserUtils
     }
 
     /**
-     * 
      * @param {string} type 
      * @param {string} name 
      */
@@ -41,7 +40,6 @@ export default class ParserUtils
     }
 
     /**
-     * 
      * @param {string} code 
      * @returns 
      */
@@ -73,7 +71,6 @@ export default class ParserUtils
     }
 
     /**
-     * 
      * @param {string} code 
      * @param {string[]} operators 
      */
@@ -86,8 +83,13 @@ export default class ParserUtils
         })
     }
 
+    static isBefore (code, before, after)
+    {
+        if (code.indexOf(before) < 0) return false
+        return code.indexOf(before) < code.indexOf(after) || code.indexOf(after) == -1
+    }
+
     /**
-     * 
      * @param {string} beginSymbol 
      * @param {string} endSymbol 
      * @param {string} code 
@@ -110,5 +112,21 @@ export default class ParserUtils
             code = code.substring(1)
             i++
         }
+    }
+
+    /**
+     * @param {string} code 
+     * @returns {string}
+     */
+    static extractScopeBody (code)
+    {
+        let body = ''
+        if (this.isBefore(code, '{', ';'))
+            body = ParserUtils.extractScope(code, '{', '}')
+        else
+            body = code.substring(code.indexOf(')') + 1, code.indexOf(';') + 1)
+        
+        if (!this.getNextWord(code, 1).startsWith('(')) body = code.substring(code.indexOf(this.getNextWord(code, 0)) + this.getNextWord(code, 0).length, code.indexOf(';') + 1).trim()
+        return body
     }
 }
