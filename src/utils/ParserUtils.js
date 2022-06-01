@@ -2,10 +2,15 @@ import stringUtils from "./stringUtils"
 
 export default class ParserUtils
 {
+    static getWords (code)
+    {
+        if (!code) return []
+        return stringUtils.removeMultipleSpaces(code.replace(/\t/gm, ' ')).split(' ')
+    }
+
     static getNextWord (code, wordPos)
     {
-        if (!code) return null
-        const words = stringUtils.removeMultipleSpaces(code.replace(/\t/gm, '')).split(' ')
+        const words = this.getWords(code) || []
         if (wordPos > words.length - 1) return null
 
         return words[wordPos]
@@ -42,18 +47,27 @@ export default class ParserUtils
      */
     static extractIdentifierDefinition (code)
     {
-        if (!this.getNextWord(code, 1)) return null
-        var type = this.getNextWord(code, 0)
-        var name = this.getNextWord(code, 1)
-        if (name.indexOf(';') >= 0)
-            name = name.substring(0, name.indexOf(';'))
-        if (name.indexOf('(') >= 0)
-            name = name.substring(0, name.indexOf('('))
+        var scope = code
+        if (scope.includes(';'))
+            scope = scope.substring(0, scope.indexOf(';'))
+        if (scope.includes('(') && !scope.includes('='))
+            scope = scope.substring(0, scope.indexOf('('))
+        if (scope.includes('='))
+            scope = scope.replace('=', ' = ')
+        const words = this.getWords(scope)
+        var defaultValue = null
+        var type = ''
+        var name = ''
+        if (words.includes('='))
+        {
+            defaultValue = words.splice(words.indexOf('=') + 1).join(' ').trim()
+            words.pop()
+        }
+        name = words.pop().trim()
+        type = words.join(' ').trim()
         type += name.substring(name.indexOf('*'), name.lastIndexOf('*') + 1)
         name = name.replace(/\*/gm, '')
-        if (name.includes(';')) name = name.substring(0, name.indexOf(';'))
-        let defaultValue = code.indexOf('=') < code.indexOf(';') ? code.substring(code.indexOf('=') + 1, code.indexOf(';')).trim() : null
-        const readUpTo = defaultValue ? code.indexOf(';') + 1 : code.indexOf(name) + name.length
+        const readUpTo = scope.length
 
         return { type, name, defaultValue, readUpTo }
     }

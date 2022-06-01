@@ -1,9 +1,11 @@
+import AssignmentToken from './AssignmentToken'
 import CommentToken, { CommentTokenType } from './CommentToken'
 import ConditionalToken, { ConditionalTokenType } from './ConditionalToken'
 import DefinitionToken from './DefinitionToken'
 import FunctionCallToken from './FunctionCallToken'
 import FunctionDefinitionToken from './FunctionDefinitionToken'
 import IncludeToken from './IncludeToken'
+import NewlineToken from './NewlineToken'
 import ParserUtils from './ParserUtils'
 import ReturnToken from './ReturnToken'
 import stringUtils from './stringUtils'
@@ -31,11 +33,46 @@ export default class CodeWriter
         this.str += `${this.identationChar.repeat(this.identation)}${text}\n`
     }
 
+    orderTokens ()
+    {
+        const tokens = this.tokens.slice(0)
+        for (let i = 0; i < tokens.length; i++)
+        {
+            const token = tokens[i]
+            if (token instanceof DefinitionToken && token.defaultValue)
+            {
+                tokens.splice(i, 0, new AssignmentToken(token.name, token.defaultValue))
+                token.defaultValue = null
+            }
+        }
+
+        const ordered = []
+        ordered.push(...tokens.filter(t => t instanceof CommentToken))
+        ordered.push(...tokens.filter(t => t instanceof IncludeToken))
+        ordered.push(...tokens.filter(t => t instanceof FunctionDefinitionToken))
+        ordered.push(...tokens.filter(t => t instanceof DefinitionToken))
+        ordered.push(...tokens.filter(t => !ordered.includes(t)))
+        this.tokens = ordered
+    }
+
     toString ()
     {
+        this.orderTokens()
+
         for (let i = 0; i < this.tokens.length; i++)
         {
             const token = this.tokens[i]
+            const lastToken = i == 0 ? null : this.tokens[i - 1]
+            
+            if (lastToken)
+            {
+                if (token instanceof IncludeToken && lastToken instanceof CommentToken)
+                    this.str += '\n'
+                if (token instanceof FunctionDefinitionToken)
+                    this.str += '\n'
+                if (token instanceof DefinitionToken == false && lastToken instanceof DefinitionToken)
+                    this.str += '\n'
+            }
 
             if (token instanceof CommentToken)
             {
@@ -56,7 +93,7 @@ export default class CodeWriter
                 const args = token.args.map(a =>
                 {
                     const {type, name} = ParserUtils.swapIdentifierPointerStars(a.type, a.name)
-                    return `${type} ${name}`
+                    return `${type} ${name}`.trim()
                 }).join(', ')
                 const body = new CodeWriter(token.body, this.identation + 1).toString()
 
@@ -102,15 +139,26 @@ export default class CodeWriter
                 })[0]
                 const longestType = ParserUtils.swapIdentifierPointerStars(longestTypeDef.type, longestTypeDef.name).type
                 const diff = longestType.length - type.length
-                var padding = '\t'.repeat(diff / 4)
+                var padding = '\t'.repeat(Math.ceil(Math.max(1, diff / 4)   ))
                 if (type == longestType) padding = '\t'
 
+                console.log(`${type}${padding}${name}${token.defaultValue ? (' = ' + token.defaultValue) : ''};`, diff)
                 this.appendLine(`${type}${padding}${name}${token.defaultValue ? (' = ' + token.defaultValue) : ''};`)
             }
 
             if (token instanceof FunctionCallToken)
             {
                 this.appendLine(`${token.name}(${token.args});`)
+            }
+
+            if (token instanceof NewlineToken)
+            {
+                this.appendLine('')
+            }
+
+            if (token instanceof AssignmentToken)
+            {
+                this.appendLine(`${token.identifier} = ${token.value};`)
             }
         }
 

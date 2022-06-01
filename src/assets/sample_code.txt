@@ -1,36 +1,42 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   ft_list_pop.c                                      :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: adaubric <adaubric@42.fr>                  +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/04 12:44:06 by adaubric          #+#    #+#             */
-/*   Updated: 2022/02/23 14:22:17 by adaubric         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "ft_list.h"
-#include "../math/ft_math.h"
-
-t_link *ft_list_pop(t_list *self)
+struct t_formatted_element	*new_formatted_element(void)
 {
-    // that would be shit
-    if (self == NULL) return NULL;
+	t_formatted_element	*elem;
 
-    int  a = 2;
-    int* b;
-    t_list_super_weird          ****a = my_dick();
-
-    if (self->length == 0)
-    {
-        printf("length is 0!");
-        return (NULL);
-    }
-    return (self->remove_at(self, self->length - 1));
+	elem = ft_safe_malloc(sizeof(t_formatted_element));
+	elem->value = NULL;
+	elem->length = 0;
+	return (elem);
 }
 
-int main (int c)
+t_link	*ft_map_formatted_to_str(t_link *elem)
 {
-    return c * 2;
+	if (!elem || !elem->data || !elem->data->value)
+		return (NULL);
+	t_formatted_element *curr = elem->data->value;
+	t_link *new = new_link();
+	new->set_data(new, new_typed_ptr_str(ft_strdup(curr->value)));
+	return (new);
+}
+
+char	*ft_str_format_handle_args(const char *input, va_list args)
+{
+	t_list				*list;
+	char				*str;
+
+	list = ft_printf_parse_args(args, (char *) input);
+	list = list->map(list, &ft_map_formatted_to_str);
+	str = list->join(list, STRING_EMPTY);
+	list->free(list);
+	return (str);
+}
+
+char	*ft_str_format(const char *input, ...)
+{
+	va_list				args;
+	char				*str;
+
+	va_start(args, input);
+	str = ft_str_format_handle_args(input, args);
+	va_end(args);
+	return (str);
 }
