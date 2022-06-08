@@ -1,4 +1,4 @@
-import String from '@/utils/stringUtils'
+import String from '@/utils/StringUtils'
 import DOMUtils from '@/utils/DOMUtils'
 
 function shadeColor (color, percent)

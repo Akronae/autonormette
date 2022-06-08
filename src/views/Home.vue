@@ -3,6 +3,7 @@ import Button from '@/components/Button'
 import sample_code from '@/assets/sample_code.txt'
 import CodeParser from '@/utils/CodeParser'
 import CodeWriter from '@/utils/CodeWriter'
+import JSONUtils from '@/utils/JSONUtils'
 
 
 export default
@@ -42,7 +43,8 @@ export default
         code ()
         {
             const parser = new CodeParser(this.code)
-            this.parsed = JSON.stringify(parser.tokens, null, 2)
+            this.parsed = JSON.stringify(parser.tokens, JSONUtils.getCircularReplacer(), 2)
+            console.log(parser.tokens)
             this.formatted = new CodeWriter(parser.tokens).toString()
         }
     },

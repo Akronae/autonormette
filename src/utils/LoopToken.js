@@ -33,10 +33,6 @@ export default class LoopToken extends CodeToken
      * @type {CodeToken}
      */
     condition
-    /**
-     * @type {CodeToken[]}
-     */
-    body
 
     /**
      * 
@@ -49,6 +45,6 @@ export default class LoopToken extends CodeToken
         super('LoopToken')
         this.type = type
         this.condition = condition
-        this.body = body
+        this.children = body
     }
 }

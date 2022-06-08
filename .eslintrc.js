@@ -35,7 +35,7 @@ module.exports =
         // allow debugger during development
         'no-debugger': process.env.BUILD_TYPE === 'production' ? 'error' : 'off',
         'no-undef': 'error',
-        'newline-before-return': 'error',
+        'newline-before-return': 0,
         'brace-style': ['warn', 'allman', { allowSingleLine: true }],
         'indent': ['off', 4],
         'no-unused-vars': ['warn', {args: 'none'}],

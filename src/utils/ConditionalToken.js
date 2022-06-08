@@ -41,10 +41,6 @@ export default class ConditionalToken extends CodeToken
      * @type {CodeToken}
      */
     condition
-    /**
-     * @type {CodeToken[]}
-     */
-    body
 
     /**
      * 
@@ -57,6 +53,6 @@ export default class ConditionalToken extends CodeToken
         super('ConditionalToken')
         this.type = type
         this.condition = condition
-        this.body = body
+        this.children = body
     }
 }

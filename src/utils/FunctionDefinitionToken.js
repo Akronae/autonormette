@@ -9,10 +9,6 @@ export default class FunctionDefinitionToken extends CodeToken
     name
     /** @type {DefinitionToken[]} */
     args = []
-    /**
-     * @type {CodeToken[]}
-     */
-    body
 
     /**
      * 
@@ -27,6 +23,6 @@ export default class FunctionDefinitionToken extends CodeToken
         this.returnType = returnType
         this.name = name
         this.args = args
-        this.body = body
+        this.children = body
     }
 }

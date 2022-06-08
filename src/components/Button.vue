@@ -1,6 +1,6 @@
 <script>
 import CircleSpinner from '@/components/CircleSpinner'
-import StringUtils from '@/utils/stringUtils'
+import StringUtils from '@/utils/StringUtils'
 
 export default
 {

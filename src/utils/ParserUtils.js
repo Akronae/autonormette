@@ -1,13 +1,28 @@
-import stringUtils from "./stringUtils"
+import StringUtils from "./StringUtils"
 
 export default class ParserUtils
 {
+    static cleanSpaces (code)
+    {
+        return StringUtils.removeMultipleSpaces(code.replace(/\t/gm, ' ')).trim()
+    }
+
+    /**
+     * 
+     * @param {string} code 
+     * @returns {Array<string>}
+     */
     static getWords (code)
     {
         if (!code) return []
-        return stringUtils.removeMultipleSpaces(code.replace(/\t/gm, ' ')).trim().split(' ')
+        return this.cleanSpaces(code).split(' ')
     }
 
+    /**
+     * @param {string} code 
+     * @param {number} wordPos 
+     * @returns {string}
+     */
     static getNextWord (code, wordPos)
     {
         const words = this.getWords(code) || []
@@ -19,24 +34,30 @@ export default class ParserUtils
     /**
      * @param {string} type 
      * @param {string} name 
+     * @param {boolean} fromNameToType 
      */
-    static swapIdentifierPointerStars (type, name)
+    static swapIdentifierPointerStars (type, name, fromNameToType)
     {
-        var newName = name.slice(0)
-        while (newName.startsWith('*')) newName = newName.substring(1)
+        if (fromNameToType)
+        {
+            while (name.startsWith('*'))
+            {
+                name = name.substring(1)
+                type = type + '*'
+            }
+        }
+        else
+        {
+            while(type.endsWith('*'))
+            {
+                type = type.substring(0, type.length - 1)
+                name = '*' + name
+            }
+        }
         
-        while(type.endsWith('*'))
-        {
-            type = type.substring(0, type.length - 1)
-            newName = '*' + newName
-        }
-        while (name.startsWith('*'))
-        {
-            name = name.substring(1)
-            type = type + '*'
-        }
-
-        return {type, name: newName}
+        type = type.replace(/ \*/gm, '*')
+        name = name.replace(/ \*/gm, '*')
+        return {type, name}
     }
 
     /**
@@ -46,14 +67,18 @@ export default class ParserUtils
     static extractIdentifierDefinition (code)
     {
         var scope = code
+        
         if (scope.includes(';'))
             scope = scope.substring(0, scope.indexOf(';'))
-        if (scope.includes('(') && !scope.includes('='))
+        else if (scope.includes('(*') && scope.indexOf('(*') == scope.indexOf('('))
+            scope = scope.substring(0, scope.lastIndexOf(')') + 1)
+        else if (scope.includes('(') && !scope.includes('='))
             scope = scope.substring(0, scope.indexOf('('))
+        
         if (scope.includes('='))
             scope = scope.replace('=', ' = ')
+        
         const words = this.getWords(scope)
-        console.log(words)
         var defaultValue = null
         var type = ''
         var name = ''
@@ -62,27 +87,28 @@ export default class ParserUtils
             defaultValue = words.splice(words.indexOf('=') + 1).join(' ').trim()
             words.pop()
         }
-        name = words.pop().trim()
-        type = words.join(' ').trim()
-        type += name.substring(name.indexOf('*'), name.lastIndexOf('*') + 1)
-        name = name.replace(/\*/gm, '')
+        name = words.pop()
+        type = words.join(' ')
+
+        if (scope.includes('(*'))
+        {
+            type = scope.substring(0, scope.indexOf('(*'))
+            name = scope.substring(scope.indexOf('(*'))
+        }
+
+        const swap = this.swapIdentifierPointerStars(type, name, true)
+        type = swap.type
+        name = swap.name
+
+        type = StringUtils.replaceAll(type, '\t', '')
+        if (name.includes('=')) name = name.substring(0, name.indexOf('='))
+
+        type = type.trim()
+        name = name.trim()
+
         const readUpTo = scope.length
 
-        console.log({ type, name, defaultValue, readUpTo })
         return { type, name, defaultValue, readUpTo }
-    }
-
-    /**
-     * @param {string} code 
-     * @param {string[]} operators 
-     */
-    static includesBinaryOperator (code, operators)
-    {
-        code = code.replace(/ /gm, '').replace(/\n/gm, '')
-        operators.forEach(op =>
-        {
-            //if (code.includes(op) && code.inde)
-        })
     }
 
     static isBefore (code, before, after)
@@ -110,7 +136,33 @@ export default class ParserUtils
             if (code.startsWith(endSymbol))
                 depth--
             if (depth == 0)
-                return original.substring(original.indexOf(beginSymbol) + 1, original.indexOf(beginSymbol) + i)
+                return original.substring(StringUtils.indexPast(original, beginSymbol), original.indexOf(beginSymbol) + i)
+            code = code.substring(1)
+            i++
+        }
+    }
+
+    /**
+     * @param {string} code 
+     * @param {RegExp} beginSymbol 
+     * @param {RegExp} endSymbol 
+     * @returns {string}
+     */
+    static extractScopeRegex (code, beginSymbol, endSymbol)
+    {
+        let depth = 0;
+        let i = 0
+        let original = code.slice(0)
+        code = code.substring(StringUtils.indexOfRegex(code, beginSymbol))
+        var rtrn = ''
+        while (code)
+        {
+            if (StringUtils.startsWithRegex(code, beginSymbol))
+                depth++
+            if (StringUtils.startsWithRegex(code, endSymbol))
+                depth--
+            if (depth == 0)
+                return original.substring(StringUtils.indexPastRegex(original, beginSymbol), StringUtils.indexOfRegex(original, beginSymbol) + i)
             code = code.substring(1)
             i++
         }
@@ -126,9 +178,8 @@ export default class ParserUtils
         if (this.isBefore(code, '{', ';'))
             body = ParserUtils.extractScope(code, '{', '}')
         else
-            body = code.substring(code.indexOf(')') + 1, code.indexOf(';') + 1)
+            body = code.substring(0, code.indexOf(';') + 1)
         
-        if (!this.getNextWord(code, 1).startsWith('(')) body = code.substring(code.indexOf(this.getNextWord(code, 0)) + this.getNextWord(code, 0).length, code.indexOf(';') + 1).trim()
         return body
     }
 }

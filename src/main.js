@@ -7,7 +7,7 @@ import App from '@/App'
 import router from '@/router'
 import store from '@/stores'
 import theme from '@/theme'
-import StringUtils from '@/utils/stringUtils'
+import StringUtils from '@/utils/StringUtils'
 import ParserUtils from '@/utils/ParserUtils'
 import {InlineSvgPlugin} from 'vue-inline-svg';
 

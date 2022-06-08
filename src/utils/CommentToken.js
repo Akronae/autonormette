@@ -40,12 +40,4 @@ export default class CommentToken extends CodeToken
         this.type = type
         this.content = content
     }
-
-    toString ()
-    {
-        if (this.type == CommentTokenType.Singleline)
-            return '//' + this.content
-        if (this.type == CommentTokenType.Multiline)
-            return '/*' + this.content + '*/'
-    }
 }
